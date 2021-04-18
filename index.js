@@ -35,13 +35,7 @@ client.connect((err) => {
     const name = req.body.name;
     const price = req.body.price;
     const description = req.body.description;
-    const filePath = `${__dirname}/service/${file.name}`;
-    file.mv(filePath, (err) => {
-      if (err) {
-        console.log(err);
-        res.status(500).send({ msg: "Failed to upload Image" });
-      }
-      const newImg = fs.readFileSync(filePath);
+      const newImg = req.files.file.data;
       const encImg = newImg.toString("base64");
 
       var image = {
@@ -52,15 +46,8 @@ client.connect((err) => {
       serviceCollection
         .insertOne({ name, price, description, image })
         .then((result) => {
-          fs.remove(filePath, (error) => {
-            if (error) {
-              console.log(error);
-              res.status(500).send({ msg: "Failed to upload Image" });
-            }
             res.send(result.insertedCount > 0);
-          });
         });
-    });
   });
 
   app.get("/services", (req, res) => {
@@ -136,6 +123,4 @@ client.connect((err) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});
+app.listen(process.env.PORT || port)
